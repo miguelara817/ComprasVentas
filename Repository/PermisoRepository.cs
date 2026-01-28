@@ -19,6 +19,11 @@ public class PermisoRepository
           return await _context.Permisos.ToListAsync();
      }
 
+     public async Task<Permiso?> GetByIdAsync(int permisoId)
+     {
+          return await _context.Permisos.FirstOrDefaultAsync(p => p.Id == permisoId);
+     }
+
      public async Task<int> CreateAsync(Permiso permiso)
      {
           _context.Permisos.Add(permiso);
