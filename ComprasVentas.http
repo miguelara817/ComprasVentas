@@ -4,3 +4,37 @@ GET {{ComprasVentas_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# Permiso Controller Tests
+
+### Get All Permisos
+GET {{ComprasVentas_HostAddress}}/api/Permiso
+Accept: application/json
+
+### Create Permiso
+POST {{ComprasVentas_HostAddress}}/api/Permiso
+Content-Type: application/json
+
+{
+    "nombre": "Crear Usuario",
+    "recurso": "Usuario",
+    "accion": "Crear"
+}
+
+###
+
+# Rol Controller Tests
+
+### Get All Roles
+GET {{ComprasVentas_HostAddress}}/api/Rol
+Accept: application/json
+
+### Create Rol
+POST {{ComprasVentas_HostAddress}}/api/Rol
+Content-Type: application/json
+
+{
+    "nombre": "Administrador",
+    "descripcion": "Rol con permisos de administrador",
+    "permisoIds": [1, 2]
+}

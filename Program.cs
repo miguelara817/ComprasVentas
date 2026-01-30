@@ -1,4 +1,7 @@
 using ComprasVentas.Data;
+using ComprasVentas.Repository;
+using ComprasVentas.Services.impl;
+using ComprasVentas.Services.spec;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +12,11 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
         ?? throw new InvalidOperationException("Conexión no encontrada")));
 
 // Add services to the container.
+builder.Services.AddScoped<PermisoRepository>();
+builder.Services.AddScoped<RolRepository>();
 
+builder.Services.AddScoped<IPermisoService, PermisoService>();
+builder.Services.AddScoped<IRolService, RolService>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
