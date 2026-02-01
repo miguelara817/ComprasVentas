@@ -18,6 +18,7 @@ public class UsuarioRepository
     {
         return await _context.Usuarios
             .Include(u => u.Persona)
+            .Include(U => U.Roles)
             .ToListAsync();
     }
 
@@ -25,6 +26,7 @@ public class UsuarioRepository
     {
         return await _context.Usuarios
             .Include(u => u.Persona)
+            .Include(U => U.Roles)  
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 

@@ -3,6 +3,7 @@ using ComprasVentas.Dto;
 using ComprasVentas.Models;
 using ComprasVentas.Repository;
 using ComprasVentas.Services.spec;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql.Internal;
 
 namespace ComprasVentas.Services.impl;
@@ -13,15 +14,34 @@ public class UsuarioService(UsuarioRepository usuarioRepository) : IUsuarioServi
 
     public async Task<List<UsuarioDto>> GetAllAsync()
     {
-        var usuarios = await _usuarioRepository.GetAllAsync();
-        return usuarios.Select(u => MapToDto(u)).ToList();
+        try
+        {
+            var usuarios = await _usuarioRepository.GetAllAsync();
+            return usuarios.Select(u => MapToDto(u)).ToList();
+        }
+        catch (Exception ex)
+        {
+            
+            throw new Exception("Error al obtener los usuarios", ex);
+        }
     }
 
     public async Task<UsuarioDto> GetByIdAsync(int id)
     {
-        var usuario = await _usuarioRepository.GetUsuarioByIdAsync(id);
-        if (usuario == null) return null;
-        return MapToDto(usuario);
+        try
+        {
+            var usuario = await _usuarioRepository.GetUsuarioByIdAsync(id);
+            if (usuario == null)
+            {
+                // TODO add custom exception NotFoundException
+                throw new Exception("Usuario no econtrado");
+            }
+            return MapToDto(usuario);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
     public async Task<UsuarioDto> CreateAsync(CreateUsuarioDto dto)
     {
