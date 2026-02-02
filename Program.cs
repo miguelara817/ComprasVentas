@@ -8,15 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
+        builder.Configuration.GetConnectionString("LaptopConnection")
         ?? throw new InvalidOperationException("Conexión no encontrada")));
 
 // Add services to the container.
 builder.Services.AddScoped<PermisoRepository>();
 builder.Services.AddScoped<RolRepository>();
+builder.Services.AddScoped<UsuarioRepository>();
 
 builder.Services.AddScoped<IPermisoService, PermisoService>();
 builder.Services.AddScoped<IRolService, RolService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
