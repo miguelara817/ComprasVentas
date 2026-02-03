@@ -4,7 +4,7 @@ namespace ComprasVentas.Common;
 
 public class ErrorResponse
 {
-    public string TraceId { get; set; }
+    //public string TraceId { get; set; } = string.Empty;
     
     public int StatusCode { get; set; }
 
@@ -13,4 +13,6 @@ public class ErrorResponse
     public DateTime TimeStamp { get; set; }
 
     public string Path { get; set; } = string.Empty;
+
+    public List<string> Errors { get; set; } = [];
 }

@@ -38,3 +38,11 @@ Content-Type: application/json
     "descripcion": "Rol con permisos de administrador",
     "permisoIds": [1, 2]
 }
+
+###
+
+# Usuario Controller Tests
+
+### Get User by Id
+GET {{ComprasVentas_HostAddress}}/api/Usuario/100
+Accept: application/json
