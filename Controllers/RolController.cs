@@ -21,7 +21,7 @@ namespace ComprasVentas.Controllers
         public async Task<ActionResult<RolDto>> GetById(int id)
         {
             var rol = await _rolService.GetByIdAsync(id);
-            return rol != null ? Ok(rol): NotFound();
+            return Ok(rol);
         }
 
         [HttpPost]

@@ -128,7 +128,7 @@ public class UsuarioService(UsuarioRepository usuarioRepository, RolRepository r
         catch (Exception)
         {
             
-            throw new Exception("Error al actualizar usuario {id}");
+            throw new Exception($"Error al actualizar usuario {id}");
         }
     }
     public async Task DeleteAsync(int id)
