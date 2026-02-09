@@ -13,5 +13,5 @@ public class Rol
     // Relacion many to many
     public ICollection<Permiso> Permisos { get; set; } = new List<Permiso>();
 
-    public ICollection<Usuario> Usuario { get; set; } = [];
+    public ICollection<Usuario> Usuarios { get; set; } = [];
 }  

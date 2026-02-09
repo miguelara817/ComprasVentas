@@ -30,7 +30,7 @@ public class CreateUsuarioDto
 
     [Required(ErrorMessage = "La fevha de nacimiento es obligatoria.")]
     [RegularExpression(@"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/\d{4}$", ErrorMessage = "El formato de fecha debe ser dd/mm/yyyy.")]
-    public string Fechanacimiento {get;set;}
+    public string FechaNacimiento {get;set;}
 
     [StringLength(20)]
     public string? Genero {get;set;}

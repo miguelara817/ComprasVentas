@@ -1,9 +1,11 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using ComprasVentas.Common;
 using ComprasVentas.Models;
 using ComprasVentas.Services.spec;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ComprasVentas.Services.impl;
@@ -12,9 +14,9 @@ public class TokenService : ITokenService
 {
     private readonly JwtSettings _jwtSettings;
 
-    public TokenService(JwtSettings jwtSettings)
+    public TokenService(IOptions<JwtSettings> jwtSettings)
     {
-        _jwtSettings = jwtSettings;
+        _jwtSettings = jwtSettings.Value;
     }
     public string GenerateToken(Usuario usuario)
     {
@@ -55,13 +57,36 @@ public class TokenService : ITokenService
     }
     public string GenerateRefreshToken()
     {
-        throw new NotImplementedException();
+        var randonNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randonNumber);
+        return Convert.ToBase64String(randonNumber);
     }
 
 
     public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
     {
-        throw new NotImplementedException();
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = System.Text.Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidIssuer = _jwtSettings.Issuer,
+            ValidAudience = _jwtSettings.Audience,
+            ValidateLifetime = false //we want to get claims from expired token
+        };
+        
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new SecurityTokenException("Invalid token");
+        }
+
+        return principal;
     }
 
     public DateTime GetTokenExpiration()

@@ -1,7 +1,12 @@
 using System;
+using ComprasVentas.Common;
 using ComprasVentas.Data;
 using ComprasVentas.Dto.auth;
+using ComprasVentas.Exceptions;
+using ComprasVentas.Models;
 using ComprasVentas.Services.spec;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ComprasVentas.Services.impl;
 
@@ -11,19 +16,87 @@ public class AuthService : IAuthService
 
     private readonly AppDbContext _dbContext;
 
-    public Task<AuthResponseDto> AuthenticateAsync(AuthRequestDto authRequestDto)
+    private readonly JwtSettings _jwtSettings;
+
+    public AuthService(AppDbContext context, ITokenService tokenService, IOptions<JwtSettings> jwtSettings)
     {
-        //SearchUser
-        //Crear Token
-        //Return DTO
-        throw new NotImplementedException();
+        _dbContext = context;
+        _tokenService = tokenService;
+        _jwtSettings = jwtSettings.Value;
     }
 
-    public Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto refreshTokenDto)
+    public async Task<AuthResponseDto> AuthenticateAsync(AuthRequestDto authRequestDto)
     {
         //SearchUser
+        var user = await _dbContext.Usuarios
+            .Include(r => r.Roles)
+            .ThenInclude(r => r.Permisos)
+            .FirstOrDefaultAsync(u => u.Nombre == authRequestDto.Username);
+        if (user == null || user.Password != authRequestDto.Password)
+        {
+            throw new BadRequestException("Credenciales no válidas");
+        }
         //Crear Token
+        var accessToken = _tokenService.GenerateToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        var refreshTokenEntity = new RefreshToken
+        {
+            Token = refreshToken,
+            Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationInDays),
+            UsuarioId = user.Id,
+            Created = DateTime.UtcNow
+        };
+        _dbContext.RefreshTokens.Add(refreshTokenEntity);
+        await _dbContext.SaveChangesAsync();
         //Return DTO
-        throw new NotImplementedException();
+        return new AuthResponseDto
+        {
+            Token = accessToken,
+            RefreshToken = refreshToken,
+            Expiracion = DateTime.UtcNow.AddMinutes(_jwtSettings.TokenExpirationInMinutes),
+            identifier = user.Id
+        };
+    }
+
+    public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenDto refreshTokenDto)
+    {
+        //Search refreshToken
+        var refreshTokenEntity = await _dbContext.RefreshTokens
+            .Include(r => r.Usuario)
+            .ThenInclude(u => u.Roles)
+            .ThenInclude(p => p.Permisos)
+            .SingleOrDefaultAsync(r => r.Token == refreshTokenDto.RefreshToken);
+
+        if (refreshTokenEntity == null || refreshTokenEntity.IsRevoked)
+        {
+            throw new BadRequestException("Refresh Token invalido");
+        }
+        //Crear Token
+        var accessToken = _tokenService.GenerateToken(refreshTokenEntity.Usuario);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        refreshTokenEntity.Revoked = DateTime.UtcNow;
+        refreshTokenEntity.IsRevoked = true;
+        _dbContext.RefreshTokens.Update(refreshTokenEntity);
+
+        var newRefreshTokenEntity = new RefreshToken
+        {
+            Token = refreshToken,
+            Expires = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationInDays),
+            UsuarioId = refreshTokenEntity.Id,
+            Created = DateTime.UtcNow
+        };
+        _dbContext.RefreshTokens.Add(refreshTokenEntity);
+        await _dbContext.SaveChangesAsync();
+
+        //Return DTO
+        return new AuthResponseDto
+        {
+            Token = accessToken,
+            RefreshToken = refreshToken,
+            Expiracion = DateTime.UtcNow.AddMinutes(_jwtSettings.TokenExpirationInMinutes),
+            identifier = refreshTokenEntity.Id
+        };
     }
 }

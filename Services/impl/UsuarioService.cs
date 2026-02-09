@@ -63,13 +63,12 @@ public class UsuarioService(UsuarioRepository usuarioRepository, RolRepository r
             {
                 Nombre = dto.Nombre,
                 Correo = dto.Correo,
-                //TODO add password hashing
-                Password = dto.Password,
+                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Persona = new Persona
                 {
                     Nombres = dto.Nombres,
                     Apellidos = dto.Apellidos,
-                    Fechanacimiento = DateTime.ParseExact(dto.Fechanacimiento, "dd/mm/yyyy", null),
+                    FechaNacimiento = DateTime.ParseExact(dto.FechaNacimiento, "dd/mm/yyyy", null),
                     Genero = dto.Genero,
                     Telefono = dto.Telefono,
                     Direccion = dto.Direccion,
@@ -97,13 +96,13 @@ public class UsuarioService(UsuarioRepository usuarioRepository, RolRepository r
             if (usuario == null) throw new Exception("Usuario no encontrado");
             usuario.Nombre = dto.Nombre;
             usuario.Correo = dto.Correo;
-            usuario.Password = dto.Password;
+            usuario.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             //Actualizar datos persona
             if (usuario.Persona != null)
             {
                 usuario.Persona.Nombres = dto.Nombre != null ? dto.Nombres : usuario.Persona.Nombres;
                 usuario.Persona.Apellidos = dto.Apellidos != null ? dto.Apellidos : usuario.Persona.Apellidos;
-                usuario.Persona.Fechanacimiento = DateTime.ParseExact(dto.Fechanacimiento, "dd/mm/yyyy", null);
+                usuario.Persona.FechaNacimiento = DateTime.ParseExact(dto.FechaNacimiento, "dd/mm/yyyy", null);
                 usuario.Persona.Genero = dto.Genero;
                 usuario.Persona.Telefono = dto.Telefono;
                 usuario.Persona.Direccion = dto.Direccion;
@@ -154,7 +153,7 @@ public class UsuarioService(UsuarioRepository usuarioRepository, RolRepository r
             Correo = usuario.Correo,
             Nombres = usuario.Persona?.Nombres ?? string.Empty,
             Apellidos = usuario.Persona?.Apellidos ?? string.Empty,
-            Fechanacimiento = usuario.Persona?.Fechanacimiento.ToString("dd/mm/yyyy") ?? string.Empty,
+            FechaNacimiento = usuario.Persona?.FechaNacimiento.ToString("dd/mm/yyyy") ?? string.Empty,
             Genero = usuario.Persona?.Genero,
             Telefono = usuario.Persona?.Telefono,
             Direccion = usuario.Persona?.Direccion,

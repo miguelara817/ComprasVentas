@@ -15,7 +15,7 @@ public class UsuarioDto
 
     public string Apellidos {get;set;} = string.Empty;
 
-    public string Fechanacimiento {get;set;}
+    public string FechaNacimiento {get;set;}
 
     public string? Genero {get;set;}
 

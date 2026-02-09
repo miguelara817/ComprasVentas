@@ -22,8 +22,11 @@ builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<IPermisoService, PermisoService>();
 builder.Services.AddScoped<IRolService, RolService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); //new GlobalExceptionHandler();
 builder.Services.AddProblemDetails();
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -58,11 +61,18 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var context  = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        context.Database.Migrate();
+    }
 }
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
