@@ -18,6 +18,18 @@ public class AppDbContext : DbContext
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+    public DbSet<Sucursal> Sucursales { get; set; }
+
+    public DbSet<SucursalUser> SucursalUsers { get; set; }
+
+    public DbSet<Almacen> Almacenes { get; set; }
+
+    public DbSet<Categoria> Categorias { get; set; }
+
+    public DbSet<Producto> Productos { get; set; }
+
+    public DbSet<AlmacenProducto> AlmacenProductos { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Rol>()
