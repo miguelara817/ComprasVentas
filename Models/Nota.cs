@@ -12,9 +12,11 @@ public class Nota
 
     public decimal Impuestos { get; set; }
 
+    public decimal Total { get; set; }
+
     public decimal Descuentos { get; set; }
 
-    public string EstadoNota { get; set; } = string.Empty;
+    public bool Estado { get; set; }
 
     public string? Observaciones { get; set; }
 

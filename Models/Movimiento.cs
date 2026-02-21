@@ -6,9 +6,9 @@ public class Movimiento
 {
     public int Id { get; set; }
 
-    public int Cantidad { get; set; }
+    public decimal Cantidad { get; set; }
 
-    public int TipoMovimiento { get; set; }
+    public string TipoMovimiento { get; set; }
 
     public decimal PrecioUnitarioCompra { get; set; }
 

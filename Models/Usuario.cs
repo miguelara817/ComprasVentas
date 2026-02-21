@@ -20,4 +20,6 @@ public class Usuario
 
     public ICollection<SucursalUser> SucursalUsers { get; set; } = [];
 
+    public ICollection<Nota> Notas { get; set; } = [];
+
 }
