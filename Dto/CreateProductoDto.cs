@@ -8,9 +8,9 @@ public class CreateProductoDto
 
     public string? Descripcion { get; set; }
 
-    public string? Precio { get; set; }
+    public decimal Precio { get; set; }
 
-    public string? Imagen { get; set; }
+    public IFormFile? Imagen { get; set; } //base64
 
     public bool Estado { get; set; }
 

@@ -12,6 +12,14 @@ public class ProductoService : IProductoService
 {
     private readonly AppDbContext _context;
 
+    private readonly IFileService _fileService;
+
+    public ProductoService(AppDbContext appDbContext, IFileService fileService)
+    {
+        _context = appDbContext;
+        _fileService = fileService;
+    }
+
     public async Task<PageResultDto<ProductoDto>> GetProductosAsync(ProductoFilterDto productoFilterDto)
     {
         var query = _context.Productos.Include(p=>p.Categoria).AsQueryable();
@@ -114,14 +122,68 @@ public class ProductoService : IProductoService
         return query;
             
     }
-    public Task<ProductoDto> CreateAsync(CreateProductoDto createProductoDto)
+    public async Task<ProductoDto> CreateAsync(CreateProductoDto createProductoDto)
     {
-        throw new NotImplementedException();
+        var producto = new Producto
+        {
+            Nombre = createProductoDto.Nombre,
+            Descripcion = createProductoDto.Descripcion,
+            PrecioVentaActual = createProductoDto.Precio,
+            Estado = createProductoDto.Estado,
+            Categoria = _context.Categorias.Find(createProductoDto.CategoriaId)
+        };
+
+        //add file to producto
+        if (createProductoDto.Imagen != null)
+        {
+            var imagePath = await _fileService.SaveFileAsync(createProductoDto.Imagen);
+            producto.Imagen = imagePath;
+        }
+        if (string.IsNullOrEmpty(producto.Imagen))
+        {
+            throw new Exception("Error al guardar la imagen del producto");   
+        }
+
+        _context.Productos.Add(producto);
+        await _context.SaveChangesAsync();
+
+        var createdProducto = await _context.Productos.Include(p => p.Categoria).FirstOrDefaultAsync(p => p.Id == producto.Id);
+
+        return new ProductoDto
+        {
+            Id = createdProducto.Id,
+            Nombre = createdProducto.Nombre,
+            Descripcion = createdProducto.Descripcion,
+            UnidadMedida = createdProducto.UnidadMedida,
+            Marca = createdProducto.Marca,
+            Precio = createdProducto.PrecioVentaActual,
+            Imagen = createdProducto.Imagen,
+            Estado = createdProducto.Estado,
+            CategoriaId = createdProducto.Categoria != null ? createdProducto.Categoria.Id : 0
+        };
     }
 
-    public Task<List<ProductoDto>> FindAllProductosByAlmacenAsync(int almacenId)
+    public async Task<List<ProductoDto>> FindAllProductosByAlmacenAsync(int almacenId)
     {
-        throw new NotImplementedException();
+        var productos = await _context.AlmacenProductos
+            .Where(ap => ap.Almacen.Id == almacenId)
+            .Include(ap => ap.Producto)
+            .ThenInclude(p => p.Categoria)
+            .Select(ap => ap.Producto)
+            .ToListAsync();
+        
+        return productos.Select(p => new ProductoDto
+        {
+            Id = p.Id,
+            Nombre = p.Nombre,
+            Descripcion = p.Descripcion,
+            UnidadMedida = p.UnidadMedida,
+            Marca = p.Marca,
+            Precio = p.PrecioVentaActual,
+            Imagen = p.Imagen,
+            Estado = p.Estado,
+            CategoriaId = p.Categoria != null ? p.Categoria.Id : 0
+        }).ToList();
     }
 
 }
